@@ -5,9 +5,9 @@ from search_visualizer_helper import GRAPH, show_graph
 
 
 def bfs(start, goal):
-    events = []
-    visited = set()
-    parent = {start: None}
+    events = []  #I am storing the steps of bfs here
+    visited = set()    #keeping track of nodes that i visited
+    parent = {start: None} #storing parent of each node
     queue = deque([start])
 
     def record(action, current=None, path=None):
@@ -19,7 +19,7 @@ def bfs(start, goal):
             "path": path or []
         })
 
-    record("BFS started")
+    record("BFS started")  #recording iniital state
 
     while queue:
         node = queue.popleft()
@@ -27,7 +27,7 @@ def bfs(start, goal):
         if node in visited:
             continue
 
-        visited.add(node)
+        visited.add(node)   #this node has been visited
         record(f"Exploring {node}", node)
 
         if node == goal:
@@ -49,7 +49,7 @@ def bfs(start, goal):
 
         record(f"Updated queue after {node}", node)
 
-    record("Goal not found")
+    record("Goal not found")  #if goal can't be found
     return events
 
 
