@@ -1,14 +1,14 @@
 
 from search_visualizer_helper import GRAPH, show_graph
 
-MAX_DEPTH = 5
+MAX_DEPTH = 5  #setting maximum depth
 
 
 def iddfs(start, goal, max_depth):
-    events = []
+    events = []  #storing all search steps
 
     def record(action, current=None, visited=None, path=None):
-        events.append({
+        events.append({   #storing current search state
             "action": action,
             "current": current,
             "visited": list(visited or []),
@@ -26,7 +26,7 @@ def iddfs(start, goal, max_depth):
             path.append(node)
             visited.add(node)
 
-            record(
+            record(   #recording if the node is explored
                 f"Exploring {node} at depth {depth} "
                 f"(limit {limit})",
                 node,
@@ -34,9 +34,9 @@ def iddfs(start, goal, max_depth):
                 path if node == goal else []
             )
 
-            if node == goal:
+            if node == goal:  #search stop if node found
                 record("Goal found!", node, visited, path.copy())
-                path.pop()
+                path.pop()  #backtracking and removing current node
                 return True
 
             if depth == limit:
