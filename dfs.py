@@ -3,10 +3,10 @@ from search_visualizer_helper import GRAPH, show_graph
 
 
 def dfs(start, goal):
-    events = []
-    visited = set()
+    events = []  #storing the steps
+    visited = set()  # keeping track of visited nodes
     parent = {start: None}
-    stack = [start]
+    stack = [start]  #storing each nodes parent
 
     def record(action, current=None, path=None):
         events.append({
@@ -19,10 +19,10 @@ def dfs(start, goal):
 
     record("DFS started")
 
-    while stack:
+    while stack:  #if the stack not empty continue searching
         node = stack.pop()
 
-        if node in visited:
+        if node in visited:  #skipping already visited nodes
             continue
 
         visited.add(node)
@@ -40,8 +40,7 @@ def dfs(start, goal):
             record("Goal found!", node, path)
             return events
 
-        # Reverse order makes the alphabetically first
-        # neighbor get explored first.
+        
         for neighbor in sorted(
             GRAPH.neighbors(node), reverse=True
         ):
