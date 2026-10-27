@@ -1,32 +1,60 @@
-def dls(graph, node, goal, limit, depth=0):
-    print(node, end=" ")
 
-    if node == goal:
-        return True
+from search_visualizer_helper import GRAPH, show_graph
 
-    if depth == limit:
-        return False
+DEPTH_LIMIT = 2
 
-    for neighbor in graph[node]:
-        if dls(graph, neighbor, goal, limit, depth + 1):
+
+def dls(start, goal, depth_limit):
+    events = []
+    visited = set()
+    path = []
+
+    def record(action, current=None):
+        events.append({
+            "action": action,
+            "current": current,
+            "visited": list(visited),
+            "frontier": list(path),
+            "path": path.copy() if action == "Goal found!" else []
+        })
+
+    def search(node, depth):
+        path.append(node)
+        visited.add(node)
+        record(f"Exploring {node} at depth {depth}", node)
+
+        if node == goal:
+            record("Goal found!", node)
+            path.pop()
             return True
 
-    return False
+        if depth == depth_limit:
+            record(f"Depth limit reached at {node}", node)
+            path.pop()
+            return False
+
+        for neighbor in sorted(GRAPH.neighbors(node)):
+            if neighbor not in path:
+                if search(neighbor, depth + 1):
+                    path.pop()
+                    return True
+
+        record(f"Backtracking from {node}", node)
+        path.pop()
+        return False
+
+    record("DLS started")
+
+    found = search(start, 0)
+
+    if not found:
+        record("Goal not found within depth limit")
+
+    return events
 
 
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F', 'G'],
-    'D': [],
-    'E': [],
-    'F': [],
-    'G': []
-}
-
-limit = 1
-
-if dls(graph, 'A', 'G', limit):
-    print("\nGoal found!")
-else:
-    print("\nGoal not found within depth limit.")
+if __name__ == "__main__":
+    show_graph(
+        dls("A", "G", DEPTH_LIMIT),
+        "Depth-Limited Search (DLS)"
+    )

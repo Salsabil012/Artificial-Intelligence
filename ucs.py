@@ -1,21 +1,39 @@
+
 import heapq
 
-def ucs(graph, start, goal):
-    priority_queue = [(0, start)]
-    distances = {start: 0}
+from search_visualizer_helper import GRAPH, show_graph
+
+
+def ucs(start, goal):
+    events = []
+    visited = set()
     parent = {start: None}
+    distances = {start: 0}
+    priority_queue = [(0, start)]
+
+    def record(action, current=None, path=None):
+        events.append({
+            "action": action,
+            "current": current,
+            "visited": list(visited),
+            "frontier": [
+                node for cost, node in sorted(priority_queue)
+            ],
+            "path": path or []
+        })
+
+    record("UCS started")
 
     while priority_queue:
         cost, node = heapq.heappop(priority_queue)
 
-        if cost != distances[node]:
+        if node in visited:
             continue
 
-        print(f"{node}(cost={cost})", end=" ")
+        visited.add(node)
+        record(f"Exploring {node}, total cost = {cost}", node)
 
         if node == goal:
-            print(f"\nMinimum cost: {cost}")
-
             path = []
             current = goal
 
@@ -24,10 +42,18 @@ def ucs(graph, start, goal):
                 current = parent[current]
 
             path.reverse()
-            print("Path:", " -> ".join(path))
-            return
+            record(
+                f"Goal found! Total cost = {cost}",
+                node,
+                path
+            )
+            return events
 
-        for neighbor, edge_cost in graph[node]:
+        for neighbor in GRAPH.neighbors(node):
+            if neighbor in visited:
+                continue
+
+            edge_cost = GRAPH[node][neighbor]["weight"]
             new_cost = cost + edge_cost
 
             if new_cost < distances.get(neighbor, float("inf")):
@@ -35,20 +61,15 @@ def ucs(graph, start, goal):
                 parent[neighbor] = node
 
                 heapq.heappush(
-                    priority_queue, (new_cost, neighbor)
+                    priority_queue,
+                    (new_cost, neighbor)
                 )
 
-    print("\nGoal not found.")
+        record(f"Updated priority queue after {node}", node)
+
+    record("Goal not found")
+    return events
 
 
-graph = {
-    'A': [('B', 1), ('C', 4)],
-    'B': [('D', 2), ('E', 5)],
-    'C': [('F', 1), ('G', 3)],
-    'D': [('G', 6)],
-    'E': [('G', 1)],
-    'F': [('G', 2)],
-    'G': []
-}
-
-ucs(graph, 'A', 'G')
+if __name__ == "__main__":
+    show_graph(ucs("A", "G"), "Uniform-Cost Search (UCS)")

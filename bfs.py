@@ -1,33 +1,57 @@
+
 from collections import deque
 
-def bfs(graph, start, goal):
+from search_visualizer_helper import GRAPH, show_graph
+
+
+def bfs(start, goal):
+    events = []
+    visited = set()
+    parent = {start: None}
     queue = deque([start])
-    visited = {start}
+
+    def record(action, current=None, path=None):
+        events.append({
+            "action": action,
+            "current": current,
+            "visited": list(visited),
+            "frontier": list(queue),
+            "path": path or []
+        })
+
+    record("BFS started")
 
     while queue:
         node = queue.popleft()
-        print(node, end=" ")
+
+        if node in visited:
+            continue
+
+        visited.add(node)
+        record(f"Exploring {node}", node)
 
         if node == goal:
-            print("\nGoal found!")
-            return
+            path = []
+            current = goal
 
-        for neighbor in graph[node]:
-            if neighbor not in visited:
-                visited.add(neighbor)
+            while current is not None:
+                path.append(current)
+                current = parent[current]
+
+            path.reverse()
+            record("Goal found!", node, path)
+            return events
+
+        for neighbor in sorted(GRAPH.neighbors(node)):
+            if neighbor not in visited and neighbor not in queue:
+                parent[neighbor] = node
                 queue.append(neighbor)
 
-    print("\nGoal not found.")
+        record(f"Updated queue after {node}", node)
+
+    record("Goal not found")
+    return events
 
 
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F', 'G'],
-    'D': [],
-    'E': [],
-    'F': [],
-    'G': []
-}
-
-bfs(graph, 'A', 'G')
+if __name__ == "__main__":
+    show_graph(bfs("A", "G"), "Breadth-First Search (BFS)")
